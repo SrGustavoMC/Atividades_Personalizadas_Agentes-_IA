@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Atividades de Programação</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+        }
+        h1 {
+            color: #1877f2;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        p {
+            text-align: center;
+            color: #606770;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            display: flex;
+            gap: 1rem;
+        }
+        #url-input {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        #submit-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #submit-btn:disabled {
+            background-color: #a0bdf5;
+            cursor: not-allowed;
+        }
+        #submit-btn:hover:not(:disabled) {
+            background-color: #166fe5;
+        }
+        #loader {
+            text-align: center;
+            margin: 2rem 0;
+            font-weight: bold;
+            color: #1877f2;
+            display: none; /* Escondido por padrão */
+        }
+        #result-container {
+            margin-top: 2rem;
+            background-color: #f7f8fa;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            padding: 1.5rem;
+            white-space: pre-wrap; /* Mantém a formatação do texto */
+            font-family: "Courier New", Courier, monospace;
+            line-height: 1.6;
+            display: none; /* Escondido por padrão */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Gerador de Atividades de Programação 🤖</h1>
+        <p>Insira a URL de um site (ex: https://www.airbnb.com) e nossos agentes de IA criarão um desafio de programação completo baseado nele.</p>
+        
+        <div class="input-group">
+            <input type="url" id="url-input" placeholder="https://exemplo.com" required>
+            <button id="submit-btn">Gerar Atividade</button>
+        </div>
+
+        <div id="loader">Gerando... Nossos agentes estão trabalhando. Isso pode levar um minuto. ⏳</div>
+        
+        <pre id="result-container"></pre>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('url-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const loader = document.getElementById('loader');
+        const resultContainer = document.getElementById('result-container');
+
+        submitBtn.addEventListener('click', async () => {
+            const url = urlInput.value;
+            if (!url) {
+                alert('Por favor, insira uma URL válida.');
+                return;
+            }
+
+            // Prepara a UI para o carregamento
+            submitBtn.disabled = true;
+            loader.style.display = 'block';
+            resultContainer.style.display = 'none';
+            resultContainer.textContent = '';
+
+            try {
+                // Faz a chamada para o nosso backend Flask
+                const response = await fetch('/gerar-atividade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.erro || `Erro HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Exibe o resultado
+                resultContainer.textContent = data.resultado;
+                resultContainer.style.display = 'block';
+
+            } catch (error) {
+                resultContainer.textContent = `Ocorreu um erro: ${error.message}`;
+                resultContainer.style.display = 'block';
+                console.error('Erro ao buscar atividade:', error);
+            } finally {
+                // Restaura a UI
+                loader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>
