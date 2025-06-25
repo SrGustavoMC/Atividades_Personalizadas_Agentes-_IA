@@ -17,7 +17,7 @@ else:
     print("⚠️ Atenção: Chave de API não encontrada no arquivo .env.")
 
 # --- Inicializa o servidor Flask ---
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__)
 
 # ==============================================================================
 # PARTE 2: A CLASSE 'AGENTE'
@@ -98,7 +98,7 @@ def orquestrar_agentes():
 # ==============================================================================
 @app.route('/')
 def index():
-    return render_template('static/index.html')
+    return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
