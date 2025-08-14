@@ -88,9 +88,11 @@
         <h1>Gerador de Atividades de Programação 🤖</h1>
         <p>Insira a URL de um site (ex: https://www.airbnb.com) e nossos agentes de IA criarão um desafio de programação completo baseado nele.</p>
         
+
         <div class="input-group">
-            <input type="url" id="url-input" placeholder="https://exemplo.com" required>
+            <input type="url" id="url-input" placeholder="https://exemplo.com">
             <button id="submit-btn">Gerar Atividade</button>
+            <button id="random-btn" style="background-color:#42b72a;color:white;">Site Aleatório</button>
         </div>
 
         <div id="loader">Gerando... Nossos agentes estão trabalhando. Isso pode levar um minuto. ⏳</div>
@@ -99,57 +101,57 @@
     </div>
 
     <script>
+
         const urlInput = document.getElementById('url-input');
         const submitBtn = document.getElementById('submit-btn');
+        const randomBtn = document.getElementById('random-btn');
         const loader = document.getElementById('loader');
         const resultContainer = document.getElementById('result-container');
 
-        submitBtn.addEventListener('click', async () => {
-    const url = urlInput.value;
-    if (!url) {
-        alert('Por favor, insira uma URL válida.');
-        return;
-    }
-
-    // Prepara a UI para o carregamento
-    submitBtn.disabled = true;
-    loader.style.display = 'block';
-    resultContainer.style.display = 'none';
-    resultContainer.textContent = '';
-
-    try {
-        // A LINHA CRÍTICA ESTÁ AQUI.
-        // Substitua o texto "SEU_LINK_AQUI" pelo seu link real do Render.
-        const response = await fetch('https://atividades-personalizadas-agentes-ia.onrender.com/gerar-atividade', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ url: url }),
-        });
-
-        if (!response.ok) {
-            // Tenta ler o erro do backend, se houver
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.erro || `Erro no servidor: ${response.status}`);
+        async function gerarAtividade(url, modo) {
+            submitBtn.disabled = true;
+            randomBtn.disabled = true;
+            loader.style.display = 'block';
+            resultContainer.style.display = 'none';
+            resultContainer.textContent = '';
+            try {
+                const response = await fetch('https://atividades-personalizadas-agentes-ia.onrender.com/gerar-atividade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url, modo: modo }),
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.erro || `Erro no servidor: ${response.status}`);
+                }
+                const data = await response.json();
+                resultContainer.textContent = data.resultado;
+                resultContainer.style.display = 'block';
+            } catch (error) {
+                resultContainer.textContent = `Ocorreu um erro ao gerar a atividade:\n${error.message}`;
+                resultContainer.style.display = 'block';
+                console.error('Erro ao buscar atividade:', error);
+            } finally {
+                loader.style.display = 'none';
+                submitBtn.disabled = false;
+                randomBtn.disabled = false;
+            }
         }
 
-        const data = await response.json();
+        submitBtn.addEventListener('click', async () => {
+            const url = urlInput.value;
+            if (!url) {
+                alert('Por favor, insira uma URL válida.');
+                return;
+            }
+            await gerarAtividade(url, 'manual');
+        });
 
-        // Exibe o resultado
-        resultContainer.textContent = data.resultado;
-        resultContainer.style.display = 'block';
-
-    } catch (error) {
-        resultContainer.textContent = `Ocorreu um erro ao gerar a atividade:\n${error.message}`;
-        resultContainer.style.display = 'block';
-        console.error('Erro ao buscar atividade:', error);
-    } finally {
-        // Restaura a UI
-        loader.style.display = 'none';
-        submitBtn.disabled = false;
-    }
-});
+        randomBtn.addEventListener('click', async () => {
+            await gerarAtividade('', 'aleatorio');
+        });
     </script>
 
 </body>

@@ -121,6 +121,15 @@ meus_agentes["Revisor Pedagógico"] = Agente(
     """
 )
 
+# --- AGENTE 6: O EXPLORADOR WEB ALEATÓRIO ---
+meus_agentes["Explorador Web Aleatório"] = Agente(
+    nome="Explorador Web Aleatório",
+    system_instruction="""
+        Você é um explorador web. Sua função é escolher uma URL de um site popular, educativo ou interessante de forma aleatória.
+        Retorne apenas a URL escolhida, sem explicações. Evite sites impróprios ou de conteúdo sensível.
+    """
+)
+
 print("\n" + "="*80 + f"\nFÁBRICA CONCLUÍDA: {len(meus_agentes)} agentes contratados.\n" + "="*80)
 
 # ==============================================================================
@@ -129,14 +138,21 @@ print("\n" + "="*80 + f"\nFÁBRICA CONCLUÍDA: {len(meus_agentes)} agentes contr
 
 def main():
     """Função principal que executa o fluxo de trabalho dos agentes."""
-    print("\n--- INICIANDO ORQUESTRADOR DE AGENTES v2.0 ---")
-    tarefa_inicial = input("❓ Qual a URL do site que vamos usar como base para a atividade? (ex: https://www.airbnb.com)\n> ")
+
+    print("\n--- INICIANDO ORQUESTRADOR DE AGENTES v2.1 ---")
+    escolha = input("❓ Deseja informar uma URL ou deixar o agente escolher um site aleatório? (digite 'manual' ou 'aleatorio')\n> ").strip().lower()
     print("-" * 80)
-    
+
     # Pausa entre agentes para não sobrecarregar a API e facilitar a leitura.
-    PAUSA_ENTRE_AGENTES = 10 
+    PAUSA_ENTRE_AGENTES = 10
 
     try:
+        if escolha == "aleatorio":
+            tarefa_inicial = meus_agentes["Explorador Web Aleatório"].executar(tarefa="Escolha uma URL aleatória.")
+            print(f"\n🌐 URL escolhida pelo agente: {tarefa_inicial}")
+        else:
+            tarefa_inicial = input("❓ Qual a URL do site que vamos usar como base para a atividade? (ex: https://www.airbnb.com)\n> ")
+
         # ETAPA 1: O Analisador de Negócios define o conceito.
         contexto_conceito = meus_agentes["Analisador de Negócios"].executar(tarefa=f"Analise a URL: {tarefa_inicial}")
         print("\n---  концепт ETAPA 1: CONCEITO DE NEGÓCIO ---")

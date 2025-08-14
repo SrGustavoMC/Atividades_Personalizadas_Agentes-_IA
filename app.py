@@ -74,11 +74,27 @@ print("\n" + "="*80 + f"\nFÁBRICA CONCLUÍDA: {len(meus_agentes)} agentes contr
 # PARTE 4: ROTA DA API QUE ORQUESTRA OS AGENTES
 # ==============================================================================
 @app.route('/gerar-atividade', methods=['POST'])
+
 def orquestrar_agentes():
     data = request.get_json()
+    modo = data.get('modo', 'manual')
     tarefa_inicial = data.get('url')
-    if not tarefa_inicial:
+
+    if modo == 'aleatorio':
+        # Adiciona o agente explorador se não existir
+        if "Explorador Web Aleatório" not in meus_agentes:
+            meus_agentes["Explorador Web Aleatório"] = Agente(
+                nome="Explorador Web Aleatório",
+                system_instruction="""
+                    Você é um explorador web. Sua função é escolher uma URL de um site popular, educativo ou interessante de forma aleatória.
+                    Retorne apenas a URL escolhida, sem explicações. Evite sites impróprios ou de conteúdo sensível.
+                """
+            )
+        tarefa_inicial = meus_agentes["Explorador Web Aleatório"].executar(tarefa="Escolha uma URL aleatória.")
+        print(f"\n🌐 URL escolhida pelo agente: {tarefa_inicial}")
+    elif not tarefa_inicial:
         return jsonify({"erro": "URL não fornecida"}), 400
+
     print(f"\n🚀 Orquestração iniciada para a URL: {tarefa_inicial}")
     try:
         contexto_conceito = meus_agentes["Analisador de Negócios"].executar(tarefa=f"Analise a URL: {tarefa_inicial}")
